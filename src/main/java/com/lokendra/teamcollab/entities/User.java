@@ -1,4 +1,4 @@
-package entities;
+package com.lokendra.teamcollab.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,9 +36,12 @@ public class User {
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role = Role.MEMBER;
 
-    @ManyToMany
+    @ManyToOne
     @JoinColumn(name = "team_id")
-    private Team teamId;
+    private Team team;
+
+    @Column(name = "password")
+    private String password;
 }

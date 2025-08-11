@@ -1,4 +1,4 @@
-package entities;
+package com.lokendra.teamcollab.entities;
 
 public enum Status {
     TODO,

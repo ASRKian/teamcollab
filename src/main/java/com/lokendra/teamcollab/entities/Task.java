@@ -1,8 +1,8 @@
-package entities;
-
-import java.time.LocalDateTime;
+package com.lokendra.teamcollab.entities;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,27 +14,31 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Table(name = "messages")
+@Table(name = "tasks")
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
 @Getter
-public class Message {
+public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "content")
-    private String content;
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @ManyToOne
-    @JoinColumn(name = "sender_id")
-    private User senderId;
+    @JoinColumn(name = "project_id")
+    private Project projectId;
 
     @ManyToOne
-    @JoinColumn(name = "team_id")
-    private Team teamId;
-
-    @Column(name = "created_at", updatable = false, insertable = false)
-    private LocalDateTime createdAt;
+    @JoinColumn(name = "assigned_to")
+    private User assignedTo;
 }

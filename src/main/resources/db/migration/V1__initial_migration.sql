@@ -2,7 +2,7 @@ CREATE TABLE users (
     id BIGINT AUTO_INCREMENT NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
-    role ENUM('ADMIN', 'MANAGER', 'MEMBER'),
+    role ENUM('ADMIN', 'MANAGER', 'MEMBER') DEFAULT 'MEMBER',
     CONSTRAINT `PRIMARY` PRIMARY KEY (id)
 );
 
@@ -48,5 +48,5 @@ CREATE TABLE messages (
 );
 
 ALTER TABLE users
-ADD COLUMN team_id BIGINT NOT NULL,
+ADD COLUMN team_id BIGINT,
 ADD CONSTRAINT users_teams_id_fk Foreign Key (team_id) REFERENCES teams (id);

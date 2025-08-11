@@ -1,4 +1,4 @@
-package entities;
+package com.lokendra.teamcollab.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,13 +13,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
+
 @Setter
-@Table(name = "projects")
+@Getter
+@Entity
+@Table(name = "teams")
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-public class Project {
+public class Team {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,6 +32,6 @@ public class Project {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "team_id")
-    private Team teamId;
+    @JoinColumn(name = "admin_id")
+    private User adminId;
 }
