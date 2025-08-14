@@ -1,7 +1,23 @@
 spring:
     application:
         name: teamcollab
+    jpa:
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
     datasource:
         url: jdbc:mysql://localhost:3306/team_collab?createDatabaseIfNotExist=true
         username: root
         password: 12345678
+    jwt:
+        secret: sdghcbuwjekdfshnuciwdsfncijwkdsfncuiwdjshfncuijsdkvniujwksdn
+        accessTokenExpiration: 900 #15m
+        refreshTokenExpiration: 604800 #7d
+
+# server:
+#     error:
+#         include-stacktrace: always
+# logging:
+#     level:
+#         root: DEBUG

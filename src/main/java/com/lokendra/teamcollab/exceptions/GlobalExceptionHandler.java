@@ -6,10 +6,14 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+
 import com.lokendra.teamcollab.dto.ErrorDto;
 
 @RestControllerAdvice
@@ -35,17 +39,47 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(TeamNotFoundException.class)
+    public ResponseEntity<ErrorDto> handleTeamNotFoundException(TeamNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorDto(ex.getMessage()));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Void> handleBadCredentialsException(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(NoHandlerFoundException ex) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("status", 404);
+        error.put("error", "Not Found");
+        error.put("message", "The requested route does not exist.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("status", 415);
+        error.put("error", "Unsupported Media Type");
+        error.put("message", "Content-Type not supported. Please use application/json.");
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(error);
+    }
+
     // Missing or invalid JSON body
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleEmptyBody(HttpMessageNotReadableException ex) {
         Map<String, String> error = new HashMap<>();
-        error.put("error", "Request body is missing or invalid JSON");
+        error.put("error", "Invalid input: Please check your request body. Numeric fields must have numbers only.");
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDto> handleGeneric(Exception ex) {
-        System.out.println(ex.getMessage());
+        System.out.println(ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorDto("An unexpected error occurred"));
