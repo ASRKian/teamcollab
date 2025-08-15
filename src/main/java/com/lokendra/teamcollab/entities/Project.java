@@ -33,4 +33,9 @@ public class Project {
     @ManyToOne
     @JoinColumn(name = "team_id")
     private Team team;
+
+    public boolean isFromDifferentTeam(User user) {
+        return this.team != null && user.getTeam() != null
+                && !this.team.equals(user.getTeam());
+    }
 }

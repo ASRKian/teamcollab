@@ -9,10 +9,12 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.lokendra.teamcollab.dto.ErrorDto;
 
@@ -69,12 +71,34 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(error);
     }
 
+    public ResponseEntity<ErrorDto> handleProjectNotFoundException(ProjectNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorDto("Invalid project id"));
+    }
+
     // Missing or invalid JSON body
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleEmptyBody(HttpMessageNotReadableException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", "Invalid input: Please check your request body. Numeric fields must have numbers only.");
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorDto> handleInvalidRouteException(NoResourceFoundException ex) {
+        System.out.println(ex);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorDto("invalid Route"));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorDto> handle(HttpRequestMethodNotSupportedException ex) {
+        System.out.println(ex);
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorDto("invalid http method"));
     }
 
     @ExceptionHandler(Exception.class)
