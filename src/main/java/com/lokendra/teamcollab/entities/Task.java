@@ -1,6 +1,7 @@
 package com.lokendra.teamcollab.entities;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -19,6 +20,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Setter
 @Getter
+@Entity
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,9 +38,9 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "project_id")
-    private Project projectId;
+    private Project project;
 
     @ManyToOne
     @JoinColumn(name = "assigned_to")
-    private User assignedTo;
+    private User user;
 }

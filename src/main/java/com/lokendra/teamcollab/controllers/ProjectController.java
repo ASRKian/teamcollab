@@ -1,5 +1,6 @@
 package com.lokendra.teamcollab.controllers;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,8 @@ import com.lokendra.teamcollab.services.ProjectService;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,5 +47,12 @@ public class ProjectController {
             @PathVariable(name = "id") Long id,
             @Valid @RequestBody UpdateProjectRequest request) {
         return ResponseEntity.ok(projectService.updateProject(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProject(
+            @PathVariable(name = "id") Long id) {
+        projectService.deleteProject(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -2,8 +2,6 @@ package com.lokendra.teamcollab.services;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.lokendra.teamcollab.dto.ProjectDto;
@@ -64,5 +62,15 @@ public class ProjectService {
         projectRepository.save(project);
 
         return projectMapper.toDto(project);
+    }
+
+    public void deleteProject(Long projectId) {
+        var currentUser = authService.getCurrentUser();
+        var project = projectRepository.findById(projectId).orElseThrow(ProjectNotFoundException::new);
+        if (project.isFromDifferentTeam(currentUser)) {
+            throw new ProjectNotFoundException();
+        }
+
+        projectRepository.delete(project);
     }
 }
