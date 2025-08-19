@@ -1,14 +1,14 @@
 package com.lokendra.teamcollab.exceptions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -29,17 +29,59 @@ public class GlobalExceptionHandler {
                 .body(new ErrorDto(ex.getMessage()));
     }
 
+    // @ExceptionHandler(MethodArgumentNotValidException.class)
+    // public ResponseEntity<Map<String, String>>
+    // handleValidationExceptions(MethodArgumentNotValidException ex) {
+    // Map<String, String> errors = new HashMap<>();
+
+    // ex.getBindingResult().getAllErrors().forEach(error -> {
+    // String fieldName = ((FieldError) error).getField();
+    // String errorMessage = error.getDefaultMessage();
+    // errors.put(fieldName, errorMessage);
+    // });
+
+    // return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    // }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {
 
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "Validation failed");
+        response.put("status", HttpStatus.BAD_REQUEST.value());
 
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        // // Extract field errors
+        // Map<String, String> fieldErrors = ex.getBindingResult()
+        // .getFieldErrors()
+        // .stream()
+        // .collect(Collectors.toMap(
+        // err -> err.getField(),
+        // err -> err.getDefaultMessage(),
+        // (msg1, msg2) -> msg1 // if duplicate keys
+        // ));
+
+        // // Extract global (class-level) errors (like your @AtLeastOneField)
+        // var globalErrors = ex.getBindingResult()
+        // .getGlobalErrors()
+        // .stream()
+        // .map(err -> err.getDefaultMessage())
+        // .collect(Collectors.toList());
+
+        // response.put("fieldErrors", fieldErrors);
+        // response.put("globalErrors", globalErrors);
+        List<String> errors = new ArrayList<>();
+
+        // Field-level errors
+        ex.getBindingResult().getFieldErrors()
+                .forEach(err -> errors.add(err.getField() + ": " + err.getDefaultMessage()));
+
+        // Global/class-level errors
+        ex.getBindingResult().getGlobalErrors()
+                .forEach(err -> errors.add(err.getDefaultMessage()));
+
+        response.put("errors", errors);
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(TeamNotFoundException.class)
@@ -81,7 +123,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorDto> handleUserNotFoundException(UsernameNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDto("invalid User id"));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDto(ex.getMessage()));
     }
 
     @ExceptionHandler(TaskNotFoundException.class)
@@ -93,7 +135,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleEmptyBody(HttpMessageNotReadableException ex) {
         Map<String, String> error = new HashMap<>();
-        error.put("error", "Invalid input: Please check your request body. Numeric fields must have numbers only.");
+        error.put("error", "Invalid input: Please check your request body.");
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
@@ -111,6 +153,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorDto("invalid http method"));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorDto> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorDto(ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

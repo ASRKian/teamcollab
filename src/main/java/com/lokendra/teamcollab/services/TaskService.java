@@ -63,6 +63,9 @@ public class TaskService {
         if (request.getAssignedTo() != null) {
             var user = userRepository.findById(request.getAssignedTo())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            if(project.getTeam().getId() != user.getTeam().getId()) {
+                throw new UsernameNotFoundException("Given user is not a part of the project's team");
+            }
             task.setUser(user);
         }
 
