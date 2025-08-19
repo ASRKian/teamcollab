@@ -63,7 +63,7 @@ public class TaskService {
         if (request.getAssignedTo() != null) {
             var user = userRepository.findById(request.getAssignedTo())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            if(project.getTeam().getId() != user.getTeam().getId()) {
+            if (project.isFromDifferentTeam(user)) {
                 throw new UsernameNotFoundException("Given user is not a part of the project's team");
             }
             task.setUser(user);
@@ -75,5 +75,17 @@ public class TaskService {
 
         var taskDto = taskMapper.toDto(task);
         return taskDto;
+    }
+
+    public void deleteTask(Long taskId) {
+        var currentUser = authService.getCurrentUser();
+        var task = taskRepository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        var project = projectRepository.findById(task.getProject().getId()).orElseThrow(ProjectNotFoundException::new);
+        if (project.isFromDifferentTeam(currentUser)) {
+            throw new ProjectNotFoundException();
+        }
+
+        taskRepository.delete(task);
+        return;
     }
 }

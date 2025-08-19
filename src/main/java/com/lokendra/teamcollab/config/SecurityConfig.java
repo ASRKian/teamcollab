@@ -58,7 +58,7 @@ public class SecurityConfig {
                                                                                                   // session based
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(c -> c
-                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        // .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         // .requestMatchers(HttpMethod.POST, "/projects/**").permitAll()
                         .anyRequest().authenticated())
