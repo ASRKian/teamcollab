@@ -71,6 +71,7 @@ public class ProjectService {
             throw new ProjectNotFoundException();
         }
 
+        // taskRepository.deleteAllByProjectId(projectId);
         projectRepository.delete(project);
     }
 }

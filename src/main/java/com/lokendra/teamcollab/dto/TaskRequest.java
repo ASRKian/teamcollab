@@ -10,8 +10,8 @@ public class TaskRequest {
 
     private String description;
 
-    @NotNull(message = "Status must not be null")
-    private String status;
+    // @NotNull(message = "Status must not be null")
+    // private String status;
 
     @NotNull(message = "Project id must not be null")
     private Long projectId;

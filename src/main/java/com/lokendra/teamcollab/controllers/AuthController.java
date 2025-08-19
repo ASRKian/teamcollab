@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +18,7 @@ import com.lokendra.teamcollab.dto.LoginRequest;
 import com.lokendra.teamcollab.dto.UserDto;
 import com.lokendra.teamcollab.mappers.UserMapper;
 import com.lokendra.teamcollab.repositories.UserRepository;
+import com.lokendra.teamcollab.services.AuthService;
 import com.lokendra.teamcollab.services.JwtService;
 
 import jakarta.servlet.http.Cookie;
@@ -36,6 +36,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final JwtConfig jwtConfig;
+    private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<JwtDto> login(
@@ -74,9 +75,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> me() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        var userId = (Long) authentication.getPrincipal();
-        var user = userRepository.findById(userId).orElse(null);
+        var user = authService.getCurrentUser();
         if (user == null) {
             throw new BadCredentialsException("User not authorized");
         }
