@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>STOMP WebSocket Test</title>
+</head>
+
+<body>
+    <h2>STOMP WebSocket Test</h2>
+
+    <label>Transport:
+        <select id="transport">
+            <option value="ws">Native WebSocket</option>
+            <option value="sockjs">SockJS</option>
+        </select>
+    </label><br><br>
+
+    <label>URL:
+        <input id="url" value="ws://localhost:8080/ws" size="40">
+    </label><br><br>
+
+    <label>Subscribe to:
+        <input id="subscribe-dest" value="/topic/greetings" size="30">
+    </label><br><br>
+
+    <label>Send to:
+        <input id="send-dest" value="/app/hello" size="30">
+    </label><br>
+    <textarea id="message" rows="3" cols="40">{"name": "Lokendra"}</textarea><br><br>
+
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
+    <button onclick="subscribe()">Subscribe</button>
+    <button onclick="unsubscribe()">Unsubscribe</button>
+    <button onclick="sendMessage()">Send Message</button>
+
+    <pre id="log"></pre>
+
+    <!-- ✅ Add the required libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <script>
+        let stompClient = null;
+        let subscription = null;
+
+        function log(msg) {
+            document.getElementById("log").textContent += msg + "\n";
+        }
+
+        function connect() {
+            const transport = document.getElementById("transport").value;
+            const url = document.getElementById("url").value;
+
+            let socket = transport === "sockjs" ? new SockJS(url) : new WebSocket(url);
+
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, frame => {
+                log("Connected: " + frame);
+            });
+        }
+
+        function disconnect() {
+            if (stompClient) {
+                stompClient.disconnect(() => log("Disconnected"));
+                stompClient = null;
+            }
+        }
+
+        function subscribe() {
+            const dest = document.getElementById("subscribe-dest").value;
+            subscription = stompClient.subscribe(dest, message => {
+                log("Received: " + message.body);
+            });
+            log("Subscribed to " + dest);
+        }
+
+        function unsubscribe() {
+            if (subscription) {
+                subscription.unsubscribe();
+                log("Unsubscribed");
+            }
+        }
+
+        function sendMessage() {
+            const dest = document.getElementById("send-dest").value;
+            const body = document.getElementById("message").value;
+            stompClient.send(dest, {}, body);
+            log("Sent to " + dest + ": " + body);
+        }
+    </script>
+</body>
+
+</html>

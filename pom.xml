@@ -50,6 +50,18 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <dependency>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+            <groupId>org.springframework.boot</groupId>
+        </dependency>
+	    <dependency>
+	        <groupId>org.springframework</groupId>
+	        <artifactId>spring-messaging</artifactId>
+	    </dependency>
+	    <!-- <dependency>
+	        <groupId>org.springframework.security</groupId>
+	        <artifactId>spring-security-messaging</artifactId>
+	    </dependency> -->
 		<dependency>
             <artifactId>mysql-connector-j</artifactId>
             <groupId>com.mysql</groupId>

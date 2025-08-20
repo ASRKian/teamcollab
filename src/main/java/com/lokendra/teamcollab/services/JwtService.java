@@ -8,6 +8,7 @@ import com.lokendra.teamcollab.config.JwtConfig;
 import com.lokendra.teamcollab.entities.User;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.AllArgsConstructor;
 
@@ -50,6 +51,16 @@ public class JwtService {
             return new Jwt(claims, jwtConfig.getSecretKey());
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            getClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            System.out.println("Invalid JWT: " + e.getMessage());
+            return false;
         }
     }
 }
