@@ -1,6 +1,10 @@
 spring:
     application:
         name: teamcollab
+    cache:
+        caffeine:
+            spec: maximumSize=10000,expireAfterWrite=20m
+        cache-names: teamUsers
     jpa:
         show-sql: true
         properties:

@@ -7,16 +7,9 @@ import java.util.Map;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.lang.NonNull;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -33,13 +26,13 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final AuthHandshakeInterceptor authHandshakeInterceptor;
+    private final RoomSubscriptionInterceptor roomSubscriptionInterceptor;
     private final JwtService jwtService;
 
     @Override
     public void configureMessageBroker(@NonNull MessageBrokerRegistry config) {
-        // Server → Client messages will be prefixed with /topic
-        config.enableSimpleBroker("/topic");
+        // Server → Client messages will be prefixed with /message
+        config.enableSimpleBroker("/message");
 
         // Client → Server messages must start with /app
         config.setApplicationDestinationPrefixes("/app");
@@ -72,6 +65,11 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                 })
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
+    }
+
+    @Override
+    public void configureClientInboundChannel(@NonNull ChannelRegistration registration) {
+        registration.interceptors(roomSubscriptionInterceptor);
     }
 
     // @Override

@@ -1,35 +1,37 @@
 package com.lokendra.teamcollab.controllers;
 
-import java.security.Principal;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.stereotype.Controller;
+import com.lokendra.teamcollab.dto.MessageRequest;
+import com.lokendra.teamcollab.services.MessageService;
 
-import com.lokendra.teamcollab.dto.MessageDto;
-
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
-@Controller
 @AllArgsConstructor
+@RestController
+@RequestMapping("/messages")
 public class MessageController {
 
-    // Client sends messages to /app/sendMessage
-    @MessageMapping("/sendMessage")
+    private final SimpMessagingTemplate messagingTemplate;
+    private final MessageService messageService;
 
-    // Server then broadcasts to /topic/messages
-    @SendTo("/topic/messages")
+    @PostMapping
+    public ResponseEntity<Void> sendMessage(
+            @Valid @RequestBody MessageRequest request) {
 
-    public MessageDto sendMessage(MessageDto request, SimpMessageHeaderAccessor headerAccessor, Principal principal) {
-        // get username stored in handshake
-        Long username = (Long) headerAccessor.getSessionAttributes().get("username");
+        var messageDto = messageService.sendMessage(request);
+        var teamId = messageDto.getTeamId();
 
-        System.out.println(username);
+        // broadcasting the message to team
+        messagingTemplate.convertAndSend("/message/team/" + teamId, messageDto);
 
-        String userId = principal.getName(); // from handshake
-        System.out.println("Message from userId: " + userId);
+        return ResponseEntity.ok().build();
 
-        return request;
     }
 }
