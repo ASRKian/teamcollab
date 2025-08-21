@@ -46,15 +46,16 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
+    public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
         registry
                 .addEndpoint("/ws")
                 .setHandshakeHandler(new DefaultHandshakeHandler() {
                     @Override
-                    protected Principal determineUser(ServerHttpRequest request,
-                            WebSocketHandler wsHandler,
-                            Map<String, Object> attributes) {
-                        String query = request.getURI().getQuery(); // e.g. token=abc123
+                    protected Principal determineUser(
+                            @NonNull ServerHttpRequest request,
+                            @NonNull WebSocketHandler wsHandler,
+                            @NonNull Map<String, Object> attributes) {
+                        String query = request.getURI().getQuery();
                         if (query != null && query.startsWith("token=")) {
                             String token = query.substring(6);
                             if (jwtService.validateToken(token)) {
@@ -82,23 +83,28 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     // StompHeaderAccessor.class);
 
     // if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-    // String token = accessor.getFirstNativeHeader("token");
-
-    // if (token == null || !jwtService.validateToken(token)) {
-    // System.out.println("invalid token");
-    // throw new IllegalArgumentException("Invalid token");
+    // // initial connect handled already by HandshakeHandler
+    // return message;
     // }
 
-    // Long username = jwtService.parseToken(token).getUserId();
+    // if (StompCommand.SEND.equals(accessor.getCommand()) ||
+    // StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
 
-    // accessor.setUser(new UsernamePasswordAuthenticationToken(username, null,
+    // String token = accessor.getFirstNativeHeader("token");
+    // if (token == null || !jwtService.validateToken(token)) {
+    // throw new IllegalArgumentException("Invalid or missing token");
+    // }
+
+    // Long userId = jwtService.parseToken(token).getUserId();
+    // accessor.setUser(new UsernamePasswordAuthenticationToken(
+    // userId.toString(), null,
     // List.of(new SimpleGrantedAuthority("ROLE_" +
     // jwtService.parseToken(token).getRole()))));
-
     // }
 
     // return message;
     // }
     // });
     // }
+
 }
