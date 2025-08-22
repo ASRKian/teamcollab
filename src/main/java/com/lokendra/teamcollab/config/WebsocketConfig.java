@@ -1,24 +1,12 @@
 package com.lokendra.teamcollab.config;
 
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
-
-import com.lokendra.teamcollab.services.JwtService;
-
 import lombok.AllArgsConstructor;
 
 @Configuration
@@ -27,7 +15,8 @@ import lombok.AllArgsConstructor;
 public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final RoomSubscriptionInterceptor roomSubscriptionInterceptor;
-    private final JwtService jwtService;
+    private final AuthHandshakeInterceptor authHandshakeInterceptor;
+    private final CustomHandshakeHandler customHandshakeHandler;
 
     @Override
     public void configureMessageBroker(@NonNull MessageBrokerRegistry config) {
@@ -42,27 +31,8 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
         registry
                 .addEndpoint("/ws")
-                .setHandshakeHandler(new DefaultHandshakeHandler() {
-                    @Override
-                    protected Principal determineUser(
-                            @NonNull ServerHttpRequest request,
-                            @NonNull WebSocketHandler wsHandler,
-                            @NonNull Map<String, Object> attributes) {
-                        String query = request.getURI().getQuery();
-                        if (query != null && query.startsWith("token=")) {
-                            String token = query.substring(6);
-                            if (jwtService.validateToken(token)) {
-                                Long userId = jwtService.parseToken(token).getUserId();
-                                return new UsernamePasswordAuthenticationToken(
-                                        userId.toString(),
-                                        null,
-                                        List.of(new SimpleGrantedAuthority(
-                                                "ROLE_" + jwtService.parseToken(token).getRole())));
-                            }
-                        }
-                        throw new IllegalArgumentException("Invalid or missing token");
-                    }
-                })
+                .addInterceptors(authHandshakeInterceptor)
+                .setHandshakeHandler(customHandshakeHandler)
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
