@@ -28,7 +28,7 @@ public class RoomSubscriptionInterceptor implements ChannelInterceptor {
             return message;
         }
 
-        String destination = accessor.getDestination(); // e.g. /message/team/1
+        String destination = accessor.getDestination(); // e.g. /topic/team/1
         String userId = accessor.getUser().getName();
         if (!isUserAllowedInRoom(userId, destination)) {
             throw new AccessDeniedException("Not allowed to join room " + destination);
@@ -37,17 +37,18 @@ public class RoomSubscriptionInterceptor implements ChannelInterceptor {
     }
 
     private boolean isUserAllowedInRoom(String userIdStr, String destination) {
-        if (destination == null || !destination.startsWith("/message/team/")) {
-            return false;
+        if (destination == null || !destination.startsWith("/topic/team.")) {
+            return true;
         }
 
         try {
             String[] parts = destination.split("/");
-            if (parts.length < 4) {
+            if (parts.length < 3) {
                 return false;
             }
 
-            Long teamId = Long.valueOf(parts[3]);
+            String teamStr = parts[2];
+            Long teamId = Long.valueOf(teamStr.split("\\.")[1]);
             Long userId = Long.valueOf(userIdStr);
 
             return teamService.isTeamsUser(userId, teamId);

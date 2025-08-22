@@ -21,7 +21,16 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(@NonNull MessageBrokerRegistry config) {
         // Server → Client messages will be prefixed with /message
-        config.enableSimpleBroker("/message");
+        // Delegate to RabbitMQ instead of in-memory broker
+        config.enableStompBrokerRelay("/topic", "/exchange", "/amq/queue")
+                .setRelayHost("localhost")
+                .setRelayPort(61613) // RabbitMQ STOMP port (default)
+                .setClientLogin("guest")
+                .setClientPasscode("guest");
+
+        // Server → Client messages will be prefixed with /message
+        // but not ideal for production as it uses in memory broker
+        // config.enableSimpleBroker("/message");
 
         // Client → Server messages must start with /app
         config.setApplicationDestinationPrefixes("/app");

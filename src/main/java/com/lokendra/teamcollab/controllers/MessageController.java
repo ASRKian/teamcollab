@@ -29,7 +29,7 @@ public class MessageController {
         var teamId = messageDto.getTeamId();
 
         // broadcasting the message to team
-        messagingTemplate.convertAndSend("/message/team/" + teamId, messageDto);
+        messagingTemplate.convertAndSend("/topic/team." + teamId, messageDto);
 
         return ResponseEntity.ok().build();
 

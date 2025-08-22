@@ -19,6 +19,13 @@ spring:
         accessTokenExpiration: 604800 #7d
         refreshTokenExpiration: 604800 #7d
 
+    rabbitmq:
+        host: localhost
+        port: 5672
+        username: guest
+        password: guest
+
+
 # server:
 #     error:
 #         include-stacktrace: always
